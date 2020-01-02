@@ -13,21 +13,21 @@ import (
 	_ "github.com/lib/pq" // here
 )
 
-// const (
-// 	host     = "172.31.25.45"
-// 	port     = 5555
-// 	user     = "postgres"
-// 	password = "password"
-// 	dbname   = "pasitbeaw"
-// )
-
 const (
-	host     = "localhost"
+	host     = "172.31.25.45"
 	port     = 5555
 	user     = "postgres"
 	password = "password"
 	dbname   = "pasitbeaw"
 )
+
+// const (
+// 	host     = "localhost"
+// 	port     = 5555
+// 	user     = "postgres"
+// 	password = "password"
+// 	dbname   = "pasitbeaw"
+// )
 
 type SqlHandler struct {
 	Conn *sql.DB
