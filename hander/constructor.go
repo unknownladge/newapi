@@ -1,10 +1,10 @@
 package hander
 
 import (
-	"database/sql"
 	"time"
 )
-// normal article 
+
+// normal article
 type Article struct {
 	Id           string    `json:"Id"`
 	Title        string    `json:"Title"`
@@ -28,8 +28,4 @@ type ArticleDB struct {
 type Errordetail struct {
 	Errorcode int
 	Errordesc string
-}
-
-type databaseserver struct {
-	db sql.DB
 }
