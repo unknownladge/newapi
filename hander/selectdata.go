@@ -168,49 +168,57 @@ func ReturnSingleArticle(w http.ResponseWriter, r *http.Request) {
 	}
 
 }
-
-func selectone(n string) (string, error) {
+func dbget1(n string) Article {
 	var id, title, desc1, content, isbn, times, update string
-	var data Article
-
 	row := SqliteHandler.Conn.QueryRow(`SELECT id, title, desc1, content, isbn, createtime, recentupdate FROM articleinfo where id = $1`, n)
 
 	// isbn2 := isbn[:3]+"-"+isbn[3:4]+"-"+isbn[4:6]+"-"+isbn[7:12]+"-"+isbn[12:]
 	log.Println(row)
 	err := row.Scan(&id, &title, &desc1, &content, &isbn, &times, &update)
 	if err != nil {
-		return "", errors.New("not found")
+		return nil
+		//return nil, errors.New("not found")
 	}
 	if id == "" {
-		//log.Println("Not Found!")
-		return "", errors.New("id not found")
+		return nil
+		//return nil, errors.New("id not found")
 	}
-	data.Id = id
-	data.Title = title
-	data.Desc = desc1
-	data.Content = content
+	var ans Article
+	ans.Id = id
+	ans.Title = title
+	ans.Desc = desc1
+	ans.Content = content
+	ans.ISBN = isbn
+	ans.Time1 = times
+	ans.update = update
+	return ans
+}
+func selectone(n string) (string, error) {
+	var id, title, desc1, content, isbn, times, update string
+	var data Article
+	row := dbget1(n)
 
-	data.ISBN, err = toisbn(isbn)
+	data.Id = row.Id
+	data.Title = row.Title
+	data.Desc = row.Desc
+	data.Content = row.Content
+
+	data.ISBN, err = toisbn(row.ISBN)
 	if err != nil {
 		return "", errors.New("cannot convert isbn")
 	}
 	//	data.ISBN = isbn[:3] + "-" + isbn[3:4] + "-" + isbn[4:6] + "-" + isbn[7:12] + "-" + isbn[12:]
 	log.Println(times)
-	data.Time1, err = time.Parse(time.RFC3339, times) //2015-09-15T14:00:13Z
+	data.Time1, err = time.Parse(time.RFC3339, row.Time1) //2015-09-15T14:00:13Z
 	if err != nil {
 		panic(err)
 		//	log.Panicln("Convert time error")
 	}
-	data.Recentupdate, err = time.Parse(time.RFC3339, update) //2015-09-15T14:00:13Z
+	data.Recentupdate, err = time.Parse(time.RFC3339, row.update) //2015-09-15T14:00:13Z
 	if err != nil {
 		panic(err)
 		//	log.Panicln("Convert time error")
 	}
-	// times = strings.Replace(times, "T", " ", -1)
-	// times = strings.Replace(times, "Z", "", -1)
-	// settimes := strings.Split(times," ")
-	// log.Println(times)
-	// data.Time1 = settimes[0]+" "+settimes[1]
 	log.Println(data.Time1)
 	if err != nil {
 		log.Println(err)
