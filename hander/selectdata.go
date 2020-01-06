@@ -168,36 +168,21 @@ func ReturnSingleArticle(w http.ResponseWriter, r *http.Request) {
 	}
 
 }
-func dbget1(n string) Article {
-	var id, title, desc1, content, isbn, times, update string
-	row := SqliteHandler.Conn.QueryRow(`SELECT id, title, desc1, content, isbn, createtime, recentupdate FROM articleinfo where id = $1`, n)
 
-	// isbn2 := isbn[:3]+"-"+isbn[3:4]+"-"+isbn[4:6]+"-"+isbn[7:12]+"-"+isbn[12:]
-	log.Println(row)
-	err := row.Scan(&id, &title, &desc1, &content, &isbn, &times, &update)
-	if err != nil {
-		return nil
-		//return nil, errors.New("not found")
-	}
-	if id == "" {
-		return nil
-		//return nil, errors.New("id not found")
-	}
-	var ans Article
-	ans.Id = id
-	ans.Title = title
-	ans.Desc = desc1
-	ans.Content = content
-	ans.ISBN = isbn
-	ans.Time1 = times
-	ans.update = update
-	return ans
-}
 func selectone(n string) (string, error) {
-	var id, title, desc1, content, isbn, times, update string
+	var err error
+	var text string
+	row, err := dbget1(n)
+	if err != nil {
+		return "", errors.New("not found")
+	}
+	//var id, title, desc1, content, isbn, times, update string
+	text, err = createstring_selectone(row)
+	return text, nil
+}
+func createstring_selectone(row Article) (string, error) {
+	var err error
 	var data Article
-	row := dbget1(n)
-
 	data.Id = row.Id
 	data.Title = row.Title
 	data.Desc = row.Desc
@@ -208,34 +193,48 @@ func selectone(n string) (string, error) {
 		return "", errors.New("cannot convert isbn")
 	}
 	//	data.ISBN = isbn[:3] + "-" + isbn[3:4] + "-" + isbn[4:6] + "-" + isbn[7:12] + "-" + isbn[12:]
-	log.Println(times)
-	data.Time1, err = time.Parse(time.RFC3339, row.Time1) //2015-09-15T14:00:13Z
-	if err != nil {
-		panic(err)
-		//	log.Panicln("Convert time error")
-	}
-	data.Recentupdate, err = time.Parse(time.RFC3339, row.update) //2015-09-15T14:00:13Z
-	if err != nil {
-		panic(err)
-		//	log.Panicln("Convert time error")
-	}
-	log.Println(data.Time1)
-	if err != nil {
-		log.Println(err)
-		log.Println("Error")
-		return "", errors.New("Error")
-	} else {
-		log.Println(err)
-		s, err := json.Marshal(data)
-		if err != nil {
-			log.Println("Marshal error")
-			return "", errors.New("Marshal error")
-		}
-		log.Println(string(s))
+	//log.Println(times)
+	data.Time1 = row.Time1 //2015-09-15T14:00:13Z
 
-		return string(s), nil
-	}
+	data.Recentupdate = row.Recentupdate //2015-09-15T14:00:13Z
+
+	log.Println(data.Time1)
+
+	log.Println(err)
+	s, _ := json.Marshal(data)
+
+	log.Println(string(s))
+
+	return string(s), nil
+
 }
+
+func dbget1(n string) (Article, error) {
+	var id, title, desc1, content, isbn, times, update string
+	row  := SqliteHandler.Conn.QueryRow(`SELECT id, title, desc1, content, isbn, createtime, recentupdate FROM articleinfo where id = $1`, n)
+	var ans Article  
+	// isbn2 := isbn[:3]+"-"+isbn[3:4]+"-"+isbn[4:6]+"-"+isbn[7:12]+"-"+isbn[12:]
+	log.Println(row)
+	err := row.Scan(&id, &title, &desc1, &content, &isbn, &times, &update)
+	if err != nil {
+		//return nil
+		return ans, errors.New("not found")
+	}
+	if id == "" {
+		//return nil
+		return ans, errors.New("id not found")
+	}
+
+	ans.Id = id
+	ans.Title = title
+	ans.Desc = desc1
+	ans.Content = content
+	ans.ISBN = isbn
+	ans.Time1, _ = time.Parse(time.RFC3339, times)
+	ans.Recentupdate, _ = time.Parse(time.RFC3339, update)
+	return ans, nil
+}
+
 func selectall2() (string, error) {
 	var data Article
 	var set []Article

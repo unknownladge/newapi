@@ -51,18 +51,18 @@ func Test_setisbnformat3(t *testing.T) {
 	assert.EqualError(t, err, "string lenght not match", "")
 }
 
-func TestGetCustomerName(t *testing.T) {
-	expected := "Smalldog"
-	id := 12
+// func TestGetCustomerName(t *testing.T) {
+// 	expected := "Smalldog"
+// 	id := 12
 
-	customerRepoMock := new(CustomerRepoMock)
-	customerRepoMock.On("GetCustomerByID", 12).Return("Smalldog", nil)
+// 	customerRepoMock := new(CustomerRepoMock)
+// 	customerRepoMock.On("GetCustomerByID", 12).Return("Smalldog", nil)
 
-	customerAPI := CustomerAPI{CustomerRepo: customerRepoMock}
+// 	customerAPI := CustomerAPI{CustomerRepo: customerRepoMock}
 
-	actual, err := customerAPI.GetCustomerName(id)
+// 	actual, err := customerAPI.GetCustomerName(id)
 
-	customerRepoMock.AssertExpectations(t)
-	assert.Equal(t, nil, err)
-	assert.Equal(t, expected, actual)
-}
+// 	customerRepoMock.AssertExpectations(t)
+// 	assert.Equal(t, nil, err)
+// 	assert.Equal(t, expected, actual)
+// }
