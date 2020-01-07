@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"strings"
-	"time"
 
 	//"github.com/jmoiron/jsonq"
 	"log"
@@ -13,24 +12,31 @@ import (
 	_ "github.com/lib/pq" // here
 )
 
-const (
-	host     = "172.31.25.45"
-	port     = 5555
-	user     = "postgres"
-	password = "password"
-	dbname   = "pasitbeaw"
-)
-
 // const (
-// 	host     = "localhost"
+// 	host     = "172.31.25.45"
 // 	port     = 5555
 // 	user     = "postgres"
 // 	password = "password"
 // 	dbname   = "pasitbeaw"
 // )
 
+const (
+	host     = "localhost"
+	port     = 5432
+	user     = "postgres"
+	password = "1"
+	dbname   = "task"
+)
+
+type Dbaseapi interface {
+	dbget1(string) (Article, error)
+	Inserter(string) (string, error)
+	updatedata(string, string, string, string, string) (string, error)
+	deletedata(string) (string, error)
+}
 type SqlHandler struct {
-	Conn *sql.DB
+	Conn    *sql.DB
+	Command Dbaseapi
 }
 
 var SqliteHandler = new(SqlHandler)
@@ -55,46 +61,6 @@ func CloseDB() {
 	log.Println("DB Close")
 }
 
-func deletedata(id string) (string, error) {
-	sqlStatement := `DELETE FROM articleinfo WHERE id = $1;`
-	_, err := SqliteHandler.Conn.Exec(sqlStatement, id)
-	if err != nil {
-		return "Error", errors.New("errors")
-	}
-	return "OK", nil
-}
-func updatedata(id string, title string, desc string, content string, isbn string) (string, error) {
-	timeupdate := time.Now().Format(time.RFC3339)
-	isbn, err := setisbnformat(isbn)
-	if err != nil {
-		return "", err
-	}
-	sqlStatement := `UPDATE articleinfo SET title = $2, desc1 = $3, content = $4,isbn = $5,recentupdate = $6 WHERE id = $1;`
-	res, err := SqliteHandler.Conn.Exec(sqlStatement, id, title, desc, content, isbn, timeupdate)
-	if err != nil {
-
-		log.Println(err)
-		if strings.Contains(string(err.Error()), "out of range") {
-			//
-			return "", errors.New("out of range")
-		}
-		if strings.Contains(string(err.Error()), "value too long") {
-			//
-			return "", errors.New("value too long")
-		}
-		return "", errors.New("notfound")
-	}
-	count, err := res.RowsAffected()
-	if err != nil {
-		return "", errors.New("Columerror")
-	}
-	log.Println(count)
-	if count == 0 {
-		return "", errors.New("nothing update")
-	}
-
-	return "OK", nil
-}
 func toisbn(isbn string) (string, error) {
 	//XXX-X-XX-XXXXXX-X
 	if len(isbn) < 13 {
