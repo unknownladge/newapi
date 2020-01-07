@@ -16,7 +16,11 @@ func ReturnAllArticles(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Select all")
 	// vars := mux.Vars(r)
 	//     key := vars["id"]
-	ans, err := selectall2()
+	db := SqlHandler{
+		Conn:    SqliteHandler.Conn,
+		Command: SqliteHandler,
+	}
+	ans, err := db.selectall2()
 	if err != nil {
 		if (string(err.Error())) == "Marshal error" {
 			m := Errordetail{Errorcode: 400, Errordesc: "Marshal error"}
@@ -83,7 +87,11 @@ func ReturnSingleArticle(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Select one")
 	vars := mux.Vars(r)
 	key := vars["id"]
-	ans, err := selectone(string(key))
+	db := SqlHandler{
+		Conn:    SqliteHandler.Conn,
+		Command: SqliteHandler,
+	}
+	ans, err := db.selectone(string(key))
 	if err != nil || ans == "" {
 		log.Println(err.Error())
 		if (string(err.Error())) == "not found" {
@@ -169,10 +177,11 @@ func ReturnSingleArticle(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func selectone(n string) (string, error) {
+func (db *SqlHandler) selectone(n string) (string, error) {
 	var err error
 	var text string
-	row, err := dbget1(n)
+
+	row, err := db.Command.dbget1(n)
 	if err != nil {
 		return "", errors.New("not found")
 	}
@@ -209,10 +218,10 @@ func createstring_selectone(row Article) (string, error) {
 
 }
 
-func dbget1(n string) (Article, error) {
+func (db *SqlHandler) dbget1(n string) (Article, error) {
 	var id, title, desc1, content, isbn, times, update string
-	row  := SqliteHandler.Conn.QueryRow(`SELECT id, title, desc1, content, isbn, createtime, recentupdate FROM articleinfo where id = $1`, n)
-	var ans Article  
+	row := db.Conn.QueryRow(`SELECT id, title, desc1, content, isbn, createtime, recentupdate FROM articleinfo where id = $1`, n)
+	var ans Article
 	// isbn2 := isbn[:3]+"-"+isbn[3:4]+"-"+isbn[4:6]+"-"+isbn[7:12]+"-"+isbn[12:]
 	log.Println(row)
 	err := row.Scan(&id, &title, &desc1, &content, &isbn, &times, &update)
@@ -235,12 +244,12 @@ func dbget1(n string) (Article, error) {
 	return ans, nil
 }
 
-func selectall2() (string, error) {
+func (db *SqlHandler) selectall2() (string, error) {
 	var data Article
 	var set []Article
 
 	var id, title, desc1, content, isbn, date, update string
-	rows, err := SqliteHandler.Conn.Query(`SELECT id, title, desc1, content, isbn, createtime, recentupdate FROM articleinfo ORDER BY id ASC`)
+	rows, err := db.Conn.Query(`SELECT id, title, desc1, content, isbn, createtime, recentupdate FROM articleinfo ORDER BY id ASC`)
 	if err != nil {
 		log.Println("Failed to run query", err)
 	}

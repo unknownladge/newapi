@@ -2,11 +2,57 @@ package hander
 
 import (
 	"encoding/json"
+	"errors"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
+type selectMock struct {
+	Respond  string
+	RespondA Article
+	Err      error
+}
+
+func (db selectMock) dbget1(string) (Article, error) {
+	return db.RespondA, db.Err
+}
+func (db selectMock) Inserter(string) (string, error) {
+	return db.Respond, db.Err
+}
+func (db selectMock) updatedata(string, string, string, string, string) (string, error) {
+	return db.Respond, db.Err
+}
+func (db selectMock) deletedata(string) (string, error) {
+	return db.Respond, db.Err
+}
+func Test_select_one1(t *testing.T) {
+	key := "20"
+	mmock := selectMock{
+		Err: errors.New("not found"),
+	}
+	db := SqlHandler{
+		Command: mmock,
+	}
+	_, err := db.selectone(string(key))
+	assert.EqualError(t, err, "not found") // test , act , exc
+}
+func Test_select_one2(t *testing.T) {
+	key := "20"
+	ans := ` {"Id": "20","Title": "TWENTY","Desc": "20","Content": "c20","ISBN": "4562312345641","Time": "2020-01-07T13:50:27+07:00","Recentupdate": "2020-01-07T13:50:27+07:00"}`
+
+	var a Article
+	json.Unmarshal([]byte(ans), &a)
+	mmock := selectMock{
+		RespondA: a,
+	}
+	db := SqlHandler{
+		Command: mmock,
+	}
+	var ans1 string
+	ans1, _ = db.selectone(string(key))
+	assert.Equal(t, DB20, ans1, "Hello") // test , act , exc
+}
 func Test_createstring_selectone1(t *testing.T) {
 	var dum Article
 	var err error
@@ -31,7 +77,7 @@ func Test_createstring_selectone2(t *testing.T) {
 
 }
 
-func Test_createstring_selectone2(t *testing.T) {
+func Test_createstring_selectone3(t *testing.T) {
 	var dum Article
 	var err error
 
@@ -43,4 +89,6 @@ func Test_createstring_selectone2(t *testing.T) {
 
 }
 
+func TestReturnSingleArticle(t *testing.T) {
 
+}
