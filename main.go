@@ -8,7 +8,7 @@ import (
 	"github.com/gorilla/mux"
 
 	//thenew "github.com/beaw/newapi/hander" //server
-		thenew "newapi/hander" //server
+	thenew "github.com/unknownladge/newapi/hander" //server
 )
 
 type Article struct {
@@ -44,7 +44,7 @@ func handleRequests() {
 	myRouter.HandleFunc("/article/{id}", thenew.UpdateArticle).Methods("PUT")
 	// finally, instead of passing in nil, we want
 	// to pass in our newly created router as the second
-	// argument		
+	// argument
 	log.Fatal(http.ListenAndServe(":10000", myRouter))
 }
 func homePage(w http.ResponseWriter, r *http.Request) {
