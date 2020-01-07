@@ -2,9 +2,12 @@ package hander
 
 import (
 	"encoding/json"
+	"errors"
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strings"
+	"time"
 
 	"github.com/gorilla/mux"
 )
@@ -40,8 +43,8 @@ func UpdateArticle(w http.ResponseWriter, r *http.Request) {
 	log.Println(r)
 	log.Println(vars)
 	log.Println(id, " ", title, " ", desc, " ", content, " ", isbn)
-
-	_, err = updatedata(id, title, desc, content, isbn)
+	db := SqlHandler{Conn: SqliteHandler.Conn}
+	_, err = db.updatedata(id, title, desc, content, isbn)
 	if err != nil {
 		if (string(err.Error())) == "notfound" {
 
@@ -144,4 +147,36 @@ func UpdateArticle(w http.ResponseWriter, r *http.Request) {
 	}
 	w.WriteHeader(http.StatusOK)
 
+}
+func (db *SqlHandler) updatedata(id string, title string, desc string, content string, isbn string) (string, error) {
+	timeupdate := time.Now().Format(time.RFC3339)
+	isbn, err := setisbnformat(isbn)
+	if err != nil {
+		return "", err
+	}
+	sqlStatement := `UPDATE articleinfo SET title = $2, desc1 = $3, content = $4,isbn = $5,recentupdate = $6 WHERE id = $1;`
+	res, err := SqliteHandler.Conn.Exec(sqlStatement, id, title, desc, content, isbn, timeupdate)
+	if err != nil {
+
+		log.Println(err)
+		if strings.Contains(string(err.Error()), "out of range") {
+			//
+			return "", errors.New("out of range")
+		}
+		if strings.Contains(string(err.Error()), "value too long") {
+			//
+			return "", errors.New("value too long")
+		}
+		return "", errors.New("notfound")
+	}
+	count, err := res.RowsAffected()
+	if err != nil {
+		return "", errors.New("Columerror")
+	}
+	log.Println(count)
+	if count == 0 {
+		return "", errors.New("nothing update")
+	}
+
+	return "OK", nil
 }

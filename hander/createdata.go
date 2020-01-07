@@ -49,7 +49,8 @@ func CreateNewArticle(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	log.Println(out)
-	_, err = Inserter(string(out))
+	db := SqlHandler{Conn: SqliteHandler.Conn}
+	_, err = db.Inserter(string(out))
 
 	if err != nil {
 		log.Println("Error")
@@ -183,7 +184,7 @@ func CreateNewArticle(w http.ResponseWriter, r *http.Request) {
 	} //end of err
 }
 
-func Inserter(n string) (string, error) {
+func (db *SqlHandler) Inserter(n string) (string, error) {
 	log.Println("insert")
 	log.Println("'" + n + "'")
 
