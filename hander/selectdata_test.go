@@ -9,9 +9,10 @@ import (
 )
 
 type selectMock struct {
-	Respond  string
-	RespondA Article
-	Err      error
+	Respond      string
+	RespondA     Article
+	RespondArray []Article
+	Err          error
 }
 
 func (db selectMock) dbget1(string) (Article, error) {
@@ -25,6 +26,9 @@ func (db selectMock) updatedata(string, string, string, string, string) (string,
 }
 func (db selectMock) deletedata(string) (string, error) {
 	return db.Respond, db.Err
+}
+func (db selectMock) dbgetall() ([]Article, error) {
+	return db.RespondArray, db.Err
 }
 func Test_select_one1(t *testing.T) {
 	key := "20"
@@ -89,6 +93,32 @@ func Test_createstring_selectone3(t *testing.T) {
 
 }
 
-func TestReturnSingleArticle(t *testing.T) {
+func TestSqlHandler_selectall2(t *testing.T) {
+	ans := ` {"Id": "20","Title": "TWENTY","Desc": "20","Content": "c20","ISBN": "456-2-31-234564-1","Time": "2020-01-07T13:50:27+07:00","Recentupdate": "2020-01-07T13:50:27+07:00"}`
+
+	var a Article
+	var set []Article
+
+	json.Unmarshal([]byte(ans), &a)
+	set = append(set, a)
+	mmock := selectMock{
+		RespondArray: set,
+	}
+	db := SqlHandler{
+		Command: mmock,
+	}
+	ans1, _ := db.selectall2()
+	//assert.EqualError(t, err, "not found")
+	assert.Equal(t, "["+DB20+"]", ans1, "Hello")
 
 }
+
+// key := "20"
+// mmock := selectMock{
+// 	Err: errors.New("not found"),
+// }
+// db := SqlHandler{
+// 	Command: mmock,
+// }
+// _, err := db.selectone(string(key))
+// assert.EqualError(t, err, "not found") // test , act , exc

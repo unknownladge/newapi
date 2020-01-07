@@ -33,6 +33,7 @@ type Dbaseapi interface {
 	Inserter(string) (string, error)
 	updatedata(string, string, string, string, string) (string, error)
 	deletedata(string) (string, error)
+	dbgetall() ([]Article, error)
 }
 type SqlHandler struct {
 	Conn    *sql.DB

@@ -245,10 +245,22 @@ func (db *SqlHandler) dbget1(n string) (Article, error) {
 }
 
 func (db *SqlHandler) selectall2() (string, error) {
+	var set []Article
+	set, _ = db.Command.dbgetall()
+	s, err := json.Marshal(set)
+	if err != nil {
+		//log.Println("Marshal error")
+		return "", errors.New("Marshal error")
+	}
+	log.Println(string(s))
+
+	return string(s), nil
+}
+func (db *SqlHandler) dbgetall() ([]Article, error) {
+	var err error
+	var id, title, desc1, content, isbn, date, update string
 	var data Article
 	var set []Article
-
-	var id, title, desc1, content, isbn, date, update string
 	rows, err := db.Conn.Query(`SELECT id, title, desc1, content, isbn, createtime, recentupdate FROM articleinfo ORDER BY id ASC`)
 	if err != nil {
 		log.Println("Failed to run query", err)
@@ -258,44 +270,27 @@ func (db *SqlHandler) selectall2() (string, error) {
 
 		err = rows.Scan(&id, &title, &desc1, &content, &isbn, &date, &update)
 		if err != nil {
-			return "", errors.New("Scan row error")
+			return set, errors.New("Scan row error")
 		}
 		data.Id = id
 		data.Title = title
 		data.Desc = desc1
 		data.Content = content
-		isbn := string(isbn)
-		if len(isbn) < 13 {
-			log.Println("Error text")
-			missing := 13 - len(isbn)
-			log.Println(len(isbn))
-			log.Println(missing)
-			for i := 0; i < missing; i++ {
-				isbn = "0" + isbn
-				log.Println(isbn)
-			}
 
-		}
-		data.ISBN = isbn[:3] + "-" + isbn[3:4] + "-" + isbn[4:6] + "-" + isbn[7:12] + "-" + isbn[12:]
+		data.ISBN, _ = toisbn(isbn)
+		log.Println(data.ISBN)
 		times := date
 		data.Time1, err = time.Parse(time.RFC3339, times) //2015-09-15T14:00:13Z
 		if err != nil {
-			return "", errors.New("Time Format error")
+			return set, errors.New("Time Format error")
 		}
 		update := update
 		data.Recentupdate, err = time.Parse(time.RFC3339, update) //2015-09-15T14:00:13Z
 		if err != nil {
-			return "", errors.New("Time Format error")
+			return set, errors.New("Time Format error")
 		}
 		set = append(set, data)
 
 	}
-	s, err := json.Marshal(set)
-	if err != nil {
-		//log.Println("Marshal error")
-		return "", errors.New("Marshal error")
-	}
-	log.Println(string(s))
-
-	return string(s), nil
+	return set, nil
 }
