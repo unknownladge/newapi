@@ -36,9 +36,10 @@ func handleRequests() {
 	// creates a new instance of a mux router
 	myRouter := mux.NewRouter().StrictSlash(true)
 	// replace http.HandleFunc with myRouter.HandleFunc
+
 	myRouter.HandleFunc("/", homePage)
-	myRouter.HandleFunc("/article", thenew.ReturnAllArticles).Methods("GET")
-	myRouter.HandleFunc("/article/{id}", thenew.ReturnSingleArticle).Methods("GET")
+	myRouter.HandleFunc("/article", thenew.Od.ReturnAllArticles).Methods("GET")
+	myRouter.HandleFunc("/article/{id}", thenew.Od.ReturnSingleArticle).Methods("GET")
 	myRouter.HandleFunc("/article", thenew.CreateNewArticle).Methods("POST")
 	myRouter.HandleFunc("/article/{id}", thenew.DeleteArticle).Methods("DELETE")
 	myRouter.HandleFunc("/article/{id}", thenew.UpdateArticle).Methods("PUT")
