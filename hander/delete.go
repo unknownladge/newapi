@@ -2,11 +2,11 @@ package hander
 
 import (
 	"encoding/json"
-	"errors"
 	"log"
 	"net/http"
 
 	"github.com/gorilla/mux"
+	dbp "github.com/unknownladge/newapi/databasepath"
 )
 
 func DeleteArticle(w http.ResponseWriter, r *http.Request) {
@@ -15,11 +15,11 @@ func DeleteArticle(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 
 	id := vars["id"]
-	db := SqlHandler{Conn: SqliteHandler.Conn}
-	_, err := db.deletedata(string(id))
+	db := dbp.SqlHandler{Conn: dbp.SqliteHandler.Conn}
+	_, err := db.Deletedata(string(id))
 	if err != nil {
 		if (string(err.Error())) == "errors" {
-			m := Errordetail{Errorcode: 400, Errordesc: "Cannot Delete Somthing error"}
+			m := dbp.Errordetail{Errorcode: 400, Errordesc: "Cannot Delete Somthing error"}
 			e, err := json.Marshal(m)
 			if err != nil {
 				panic(err)
@@ -38,15 +38,4 @@ func DeleteArticle(w http.ResponseWriter, r *http.Request) {
 
 	///////////
 
-}
-
-func (db *SqlHandler) deletedata(id string) (string, error) {
-	var err error
-
-	sqlStatement := `DELETE FROM articleinfo WHERE id = $1;`
-	_, err = db.Conn.Exec(sqlStatement, id)
-	if err != nil {
-		return "Error", errors.New("errors")
-	}
-	return "OK", nil
 }

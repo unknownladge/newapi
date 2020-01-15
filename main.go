@@ -7,8 +7,8 @@ import (
 
 	"github.com/gorilla/mux"
 
-	//thenew "github.com/beaw/newapi/hander" //server
-	thenew "github.com/unknownladge/newapi/hander" //server
+	thenew2 "github.com/unknownladge/newapi/databasepath" //server
+	thenew "github.com/unknownladge/newapi/hander"        //server
 )
 
 type Article struct {
@@ -27,9 +27,9 @@ func main() {
 		Article{Id: "1", Title: "Hello 1", Desc: "Article Description", Content: "Article Content"},
 		Article{Id: "2", Title: "Hello 2", Desc: "Article Description", Content: "Article Content"},
 	}
-	thenew.ConnDB()
+	thenew2.ConnDB()
 	handleRequests()
-	defer thenew.CloseDB()
+	defer thenew2.CloseDB()
 }
 
 func handleRequests() {
@@ -38,8 +38,8 @@ func handleRequests() {
 	// replace http.HandleFunc with myRouter.HandleFunc
 
 	myRouter.HandleFunc("/", homePage)
-	myRouter.HandleFunc("/article", thenew.Od.ReturnAllArticles).Methods("GET")
-	myRouter.HandleFunc("/article/{id}", thenew.Od.ReturnSingleArticle).Methods("GET")
+	myRouter.HandleFunc("/article", thenew2.Od.ReturnAllArticles).Methods("GET")
+	myRouter.HandleFunc("/article/{id}", thenew2.Od.ReturnSingleArticle).Methods("GET")
 	myRouter.HandleFunc("/article", thenew.CreateNewArticle).Methods("POST")
 	myRouter.HandleFunc("/article/{id}", thenew.DeleteArticle).Methods("DELETE")
 	myRouter.HandleFunc("/article/{id}", thenew.UpdateArticle).Methods("PUT")
